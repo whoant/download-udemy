@@ -71,14 +71,13 @@ class Udemy {
         if (error) {
             return Promise.reject(error);
         }
-        fs.writeFileSync('data.json', JSON.stringify(lectures));
 
         [error, listLectures] = await to(
             Promise.all(
                 lectures.map(lecture => this.getVideoLecture(course, lecture))
             )
         );
-        fs.writeFileSync('data1.json', JSON.stringify(listLectures));
+
         if (error) {
             return Promise.reject(error);
         }
@@ -97,11 +96,13 @@ class Udemy {
         const pathDir = path.join(__dirname, String(course));
 
         fs.mkdirSync(pathDir);
+        let i = 1;
         for (const item of listLectures) {
             const { title, media_sources } = item;
-            const fileName = path.join(pathDir, title);
+            const fileName = path.join(pathDir, `${i}. ${title}.mp4`);
             console.log(`Downloading ${title}`);
             await this.download(fileName, media_sources[0].src);
+            i++;
         }
         console.log('Done !');
         return Promise.resolve(listLectures);
@@ -114,7 +115,7 @@ class Udemy {
                 encoding: null,
             });
 
-            fs.writeFileSync(`${pathFile}.mp4`, res);
+            fs.writeFileSync(pathFile, res);
             return Promise.resolve(true);
         } catch (error) {
             return Promise.reject(error);
